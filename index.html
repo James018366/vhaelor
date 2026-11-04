@@ -13,6 +13,7 @@
   --mono:'IBM Plex Mono',monospace; --title:'Cinzel',serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 html{background:var(--bg)}
 html,body{color:var(--txt);font-family:var(--mono);font-size:14px;min-height:100vh}
 body{background:transparent}
@@ -98,7 +99,7 @@ main{max-width:1300px;margin:0 auto;padding:24px;display:grid;grid-template-colu
 .side-actions{padding:14px 16px;border-top:1px solid var(--line2);display:grid;gap:8px}
 
 /* boutons / champs */
-.btn{font-family:var(--mono);font-size:12px;letter-spacing:.15em;text-transform:uppercase;background:transparent;color:var(--txt);border:1px solid var(--line2);padding:10px 14px;cursor:pointer;transition:.2s}
+.btn{text-decoration:none;display:inline-block;font-family:var(--mono);font-size:12px;letter-spacing:.15em;text-transform:uppercase;background:transparent;color:var(--txt);border:1px solid var(--line2);padding:10px 14px;cursor:pointer;transition:.2s}
 .btn:hover{border-color:var(--red);color:#fff;box-shadow:0 0 14px var(--glow) inset}
 .btn.primary{background:var(--red);border-color:var(--red);color:#fff}
 .btn.primary:hover{background:var(--red2);box-shadow:0 0 18px var(--glow)}
@@ -171,6 +172,16 @@ select option{background:#09090c}
 .hint{font-size:11px;color:var(--dim);text-transform:none;letter-spacing:0}
 @media(max-width:640px){.form{grid-template-columns:1fr}}
 
+.rpage{max-width:1000px;margin:0 auto;padding:24px}
+@media(max-width:900px){.rpage{padding:16px}}
+.rnav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.crumb{font-size:11px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.crumb b{color:var(--red2);font-weight:500}
+.rpage .mbox{max-width:none}
+.rpage .mhead h2{font-size:clamp(22px,3.4vw,32px)}
+.rpage .mbody{font-size:14.5px;min-height:200px}
+.rpager{display:flex;justify-content:space-between;gap:10px;margin-top:14px;flex-wrap:wrap}
+.rpager a{text-decoration:none}
 footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;padding:30px 16px 40px;text-transform:uppercase}
 
 /* boot */
@@ -315,10 +326,10 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
   </section>
 </main>
 
+<section class="rpage" id="page" hidden></section>
+
 <footer>Base de données de Vhaelor · Fan-projet non officiel</footer>
 
-<!-- modale lecture -->
-<div class="modal" id="mView"><div class="mbox panel" id="mViewBox"></div></div>
 
 <!-- modale formulaire -->
 <div class="modal" id="mForm"><div class="mbox panel">
@@ -349,7 +360,7 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
 /* ======== DONNÉES DE BASE ======== */
 const TYPES = ["Rapport annuel","Rapport journalier","Mission","Purge","Interrogatoire","Reconnaissance","Duel","Journal personnel"];
 const SEED = [
- {"id": "VR-0001", "title": "Rapport Annuel Maraudeur Vhaelor", "type": "Rapport annuel", "date": "73 ATC · Jour 209 (30/10)", "place": "Tatooine · Tombeau", "target": "Grande Sentinelle Arven · Capitaine républicain", "level": 1, "status": "ok", "jedi": 0, "to": "Maître des Maraudeurs", "tags": ["annuel", "tombeau", "formation", "capture", "Tatooine", "Arven"], "body": "Identité : @james1_8366\nRang : Maraudeur Sith.\nSphère : Techno-Production.\n\nDestiné à : Maître des Maraudeurs\n\n— RAPPORT —\n\n- Participation à une expédition dans un Tombeau.\n\n- Formation de certains guerriers devenus Maraudeurs.\n\n- Formation d'acolytes devenus guerriers, futurs Maraudeurs.\n\n- Capture du Capitaine républicain possédant l'arme unique, avec l'Empire Sith.\n\n- Capture de la Grande Sentinelle Arven sur Tatooine.\n\n- Entraînement avec certains Maraudeurs.\n\n— Fin du Rapport —"}
+ {"id": "VR-0001", "title": "RJ-Vhaelor-30/10", "type": "Rapport journalier", "date": "73 ATC · (30/10)", "place": "Secteur B", "target": "Grande Sentinelle Arven · Capitaine républicain", "level": 1, "status": "ok", "jedi": 0, "to": "Maître des Maraudeurs Mélior", "tags": ["annuel", "tombeau", "formation", "capture", "Tatooine", "Arven", "Mitth'davi'kow"], "body": "— RAPPORT —\n\n- Participation à une expédition dans un Tombeau.\n\n- Formation de certains guerriers devenus Maraudeurs.\n\n- Formation d'acolytes devenus guerriers, futurs Maraudeurs.\n\n- Capture du Capitaine républicain possédant l'arme unique, avec l'Empire Sith.\n\n- Capture de la Grande Sentinelle Arven sur Tatooine.\n\n- Entraînement avec certains Maraudeurs.\n\n— Fin du Rapport —"}
 ];
 
 /* ======== MOTEUR ======== */
@@ -420,9 +431,14 @@ function render(){
 /* lecture */
 let typingTimer;
 function openView(id){
-  const r=all().find(x=>x.id===id); if(!r)return;
-  $("#mViewBox").innerHTML=`
-    <div class="mhead"><div><div class="cid">${esc(r.id)} · <span class="lvl l${r.level}">${LVL[r.level]}</span></div><h2>${redact(r.title)}</h2></div><button class="mclose" data-close>✕</button></div>
+  const r=all().find(x=>x.id===id);
+  if(!r){showPage(`<div class="panel empty">RAPPORT ${esc(id)} INTROUVABLE<br><br><a class="btn" href="#">← Retour aux archives</a></div>`);return}
+  const list=sorted(all()), i=list.findIndex(x=>x.id===id), prev=list[i+1], next=list[i-1];
+  document.title=r.title+" · Archives Vhaelor";
+  showPage(`
+    <div class="rnav"><a class="btn" href="#">← Retour aux archives</a><span class="crumb">Archives / <b>${esc(r.id)}</b></span><button class="btn" id="btnCopy">Copier le lien</button></div>
+    <article class="mbox panel">
+    <div class="mhead"><div><div class="cid">${esc(r.id)} · <span class="lvl l${r.level}">${LVL[r.level]}</span></div><h2>${redact(r.title)}</h2></div></div>
     <dl class="mgrid">
       <div><dt>Date</dt><dd>${esc(r.date)}</dd></div>
       <div><dt>Type</dt><dd>${esc(r.type)}</dd></div>
@@ -434,14 +450,16 @@ function openView(id){
     </dl>
     <div class="mbody"><span class="typing" id="typed"></span></div>
     <div class="tags">${(r.tags||[]).map(t=>`<span class="tag">#${esc(t)}</span>`).join("")}</div>
-    <div class="mfoot"><span>— Signé : Vhaelor, Maraudeur —</span><span style="display:flex;gap:8px"><button class="btn" data-edit="${esc(r.id)}">Modifier</button><button class="btn" data-close>Fermer</button></span></div>`;
-  $("#mView").classList.add("open");
+    <div class="mfoot"><span>— Signé : Vhaelor, Maraudeur —</span><span style="display:flex;gap:8px"><button class="btn" data-edit="${esc(r.id)}">Modifier</button></span></div>
+    </article>
+    <div class="rpager">${prev?`<a class="btn" href="#/rapport/${encodeURIComponent(prev.id)}">← ${esc(prev.id)}</a>`:"<span></span>"}${next?`<a class="btn" href="#/rapport/${encodeURIComponent(next.id)}">${esc(next.id)} →</a>`:"<span></span>"}</div>`);
+  $("#btnCopy").onclick=async()=>{try{await navigator.clipboard.writeText(location.href);toast("Lien copié")}catch(e){prompt("Lien du rapport :",location.href)}};
   // effet de déchiffrement
   const html=redact(r.body), el=$("#typed"); clearInterval(typingTimer);
   const parts=html.split(/(<span class="redact"[^>]*>.*?<\/span>)/); let pi=0,ci=0,out="";
   typingTimer=setInterval(()=>{
     for(let k=0;k<6;k++){
-      if(pi>=parts.length){clearInterval(typingTimer);el.classList.remove("typing");return}
+      if(pi>=parts.length){clearInterval(typingTimer);el.innerHTML=html;el.classList.remove("typing");return}
       const p=parts[pi];
       if(p.startsWith("<span")){out+=p;pi++;continue}
       // avance en sautant les entités HTML entières
@@ -451,7 +469,16 @@ function openView(id){
     el.innerHTML=out;
   },12);
 }
-$("#list").onclick=e=>{const c=e.target.closest(".card");if(c)openView(c.dataset.id)};
+$("#list").onclick=e=>{const c=e.target.closest(".card");if(c)location.hash="#/rapport/"+encodeURIComponent(c.dataset.id)};
+function sorted(arr){return [...arr].sort((a,b)=>num(b.id)-num(a.id))}
+function showPage(html){$("main").hidden=true;const p=$("#page");p.hidden=false;p.innerHTML=html;scrollTo(0,0)}
+function route(){
+  clearInterval(typingTimer);render();
+  const m=location.hash.match(/^#\/rapport\/(.+)$/);
+  if(m){openView(decodeURIComponent(m[1]));return}
+  $("#page").hidden=true;$("#page").innerHTML="";$("main").hidden=false;document.title="Archives Vhaelor";
+}
+addEventListener("hashchange",route);
 
 /* formulaire */
 const F=$("#form");
@@ -466,7 +493,7 @@ function openForm(r){
   $("#btnDel").style.display=r?"":"none";
   if(!r)F.date.value=dateATC().txt;
   if(r){for(const k of ["title","type","date","place","target","level","status","jedi","to","body"])F[k].value=r[k]??"";F.tags.value=(r.tags||[]).join(", ")}
-  $("#mView").classList.remove("open");$("#mForm").classList.add("open");F.title.focus();
+  $("#mForm").classList.add("open");F.title.focus();
 }
 F.onsubmit=e=>{
   e.preventDefault();
@@ -475,13 +502,13 @@ F.onsubmit=e=>{
   if(SEED.some(x=>x.id===r.id))r.seed=true;
   local.added=local.added.filter(x=>x.id!==r.id).concat(r);
   local.removed=local.removed.filter(x=>x!==r.id);local.removedSeed=local.removedSeed.filter(x=>x!==r.id);
-  saveLocal(local);$("#mForm").classList.remove("open");render();toast(editing?"Rapport mis à jour":"Rapport enregistré");
+  saveLocal(local);$("#mForm").classList.remove("open");toast(editing?"Rapport mis à jour":"Rapport enregistré");const tgt="#/rapport/"+encodeURIComponent(r.id);if(location.hash===tgt)route();else location.hash=tgt;
 };
 $("#btnDel").onclick=()=>{
   if(!confirm("Supprimer définitivement ce rapport ?"))return;
   local.added=local.added.filter(x=>x.id!==editing);
   if(SEED.some(s=>s.id===editing))local.removedSeed.push(editing);
-  saveLocal(local);$("#mForm").classList.remove("open");render();toast("Rapport supprimé");
+  saveLocal(local);$("#mForm").classList.remove("open");toast("Rapport supprimé");if(location.hash)location.hash="";else route();
 };
 $("#btnNew").onclick=()=>openForm(null);
 
@@ -490,7 +517,7 @@ document.addEventListener("click",e=>{
   const ed=e.target.closest("[data-edit]");if(ed)openForm(all().find(r=>r.id===ed.dataset.edit));
 });
 document.addEventListener("keydown",e=>{
-  if(e.key==="Escape")document.querySelectorAll(".modal").forEach(m=>m.classList.remove("open"));
+  if(e.key==="Escape"){const o=document.querySelector(".modal.open");if(o)o.classList.remove("open");else if(location.hash.startsWith("#/rapport/"))location.hash=""}
   if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$("#q").focus()}
 });
 
@@ -515,7 +542,7 @@ const g=x.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);g.addColorStop(0,`rgba(2
 x.fillStyle=g;x.beginPath();x.arc(p.x,p.y,p.r*4,0,7);x.fill()});
 P=P.filter(p=>p.l>0&&p.y>-20);requestAnimationFrame(f)})()})();
 
-chips();render();
+chips();route();
 const skip=()=>{const b=$("#boot");if(!b)return;b.classList.add("out");setTimeout(()=>b.remove(),800)};
 setTimeout(skip,3300);$("#boot").addEventListener("click",skip);
 </script>
