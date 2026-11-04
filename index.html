@@ -363,14 +363,24 @@ const ST={ok:["st-ok","Succès"],wip:["st-wip","En cours"],ko:["st-ko","Échec"]
 
 function loadLocal(){try{return JSON.parse(localStorage.getItem(KEY))||{added:[],removed:[]}}catch(e){return{added:[],removed:[]}}}
 function saveLocal(d){try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){toast("Stockage local indisponible")}}
+const num=id=>parseInt(String(id).replace(/\D/g,""))||0;
 let local=loadLocal();
+/* Protection : un rapport créé dans le navigateur ne doit jamais masquer un rapport du site.
+   Seules les modifications/suppressions faites sur un rapport du site (marquées "seed") s'appliquent à lui. */
+(()=>{
+  const seedIds=new Set(SEED.map(r=>r.id));local.added=local.added||[];local.removed=local.removed||[];local.removedSeed=local.removedSeed||[];
+  let max=Math.max(0,...SEED.map(r=>num(r.id)),...local.added.map(r=>num(r.id)));
+  local.added.forEach(r=>{if(seedIds.has(r.id)&&!r.seed){r.id="VR-"+String(++max).padStart(4,"0")}});
+  local.removed=local.removed.filter(id=>!seedIds.has(id));
+  saveLocal(local);
+})();
 function all(){
   const map=new Map(SEED.map(r=>[r.id,r]));
   local.added.forEach(r=>map.set(r.id,r));
-  local.removed.forEach(id=>map.delete(id));
+  local.removed.forEach(id=>{if(!SEED.some(x=>x.id===id))map.delete(id)});
+  local.removedSeed.forEach(id=>map.delete(id));
   return [...map.values()];
 }
-const num=id=>parseInt(String(id).replace(/\D/g,""))||0;
 
 let activeType="";
 function chips(){
@@ -462,14 +472,15 @@ F.onsubmit=e=>{
   e.preventDefault();
   const r={id:editing||$("#fId").textContent,title:F.title.value.trim(),type:F.type.value,date:F.date.value.trim(),place:F.place.value.trim(),target:F.target.value.trim(),
     level:+F.level.value,status:F.status.value,jedi:+F.jedi.value||0,to:F.to.value.trim(),body:F.body.value,tags:F.tags.value.split(",").map(s=>s.trim()).filter(Boolean)};
+  if(SEED.some(x=>x.id===r.id))r.seed=true;
   local.added=local.added.filter(x=>x.id!==r.id).concat(r);
-  local.removed=local.removed.filter(x=>x!==r.id);
+  local.removed=local.removed.filter(x=>x!==r.id);local.removedSeed=local.removedSeed.filter(x=>x!==r.id);
   saveLocal(local);$("#mForm").classList.remove("open");render();toast(editing?"Rapport mis à jour":"Rapport enregistré");
 };
 $("#btnDel").onclick=()=>{
   if(!confirm("Supprimer définitivement ce rapport ?"))return;
   local.added=local.added.filter(x=>x.id!==editing);
-  if(SEED.some(s=>s.id===editing))local.removed.push(editing);
+  if(SEED.some(s=>s.id===editing))local.removedSeed.push(editing);
   saveLocal(local);$("#mForm").classList.remove("open");render();toast("Rapport supprimé");
 };
 $("#btnNew").onclick=()=>openForm(null);
@@ -483,7 +494,7 @@ document.addEventListener("keydown",e=>{
   if(e.key==="/"&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();$("#q").focus()}
 });
 
-$("#btnReset").onclick=()=>{if(confirm("Effacer tous les rapports enregistrés dans ce navigateur ?")){local={added:[],removed:[]};saveLocal(local);render();toast("Base de données vidée")}};
+$("#btnReset").onclick=()=>{if(confirm("Effacer tous les rapports enregistrés dans ce navigateur ?")){local={added:[],removed:[],removedSeed:[]};saveLocal(local);render();toast("Base de données vidée")}};
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200)}
 
