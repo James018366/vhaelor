@@ -153,8 +153,8 @@ select option{background:#09090c}
 .mhead h2{font-family:var(--title);font-size:24px;color:#fff;letter-spacing:.05em;text-shadow:0 0 12px var(--glow)}
 .mclose{background:none;border:1px solid var(--line2);color:var(--dim);width:34px;height:34px;cursor:pointer;font-size:16px;flex:none}
 .mclose:hover{color:#fff;border-color:var(--red)}
-.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--line2);border-bottom:1px solid var(--line2)}
-.mgrid div{background:var(--panel);padding:10px 14px}
+.mgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));background:var(--panel);border-bottom:1px solid var(--line2)}
+.mgrid div{padding:10px 14px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);margin-bottom:-1px}
 .mgrid dt{font-size:10px;color:var(--dim);letter-spacing:.15em;text-transform:uppercase}
 .mgrid dd{font-size:13px;margin-top:3px}
 .mbody{padding:22px;line-height:1.85;font-size:13.5px;white-space:pre-wrap}
@@ -347,8 +347,10 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
 
 <script>
 /* ======== DONNÉES DE BASE ======== */
-const TYPES = ["Rapport journalier","Mission","Purge","Interrogatoire","Reconnaissance","Duel","Journal personnel"];
-const SEED = []; // vide : les rapports se créent directement sur le site
+const TYPES = ["Rapport annuel","Rapport journalier","Mission","Purge","Interrogatoire","Reconnaissance","Duel","Journal personnel"];
+const SEED = [
+ {"id": "VR-0001", "title": "Rapport Annuel Maraudeur Vhaelor", "type": "Rapport annuel", "date": "73 ATC · Jour 209 (30/10)", "place": "Tatooine · Tombeau", "target": "Grande Sentinelle Arven · Capitaine républicain", "level": 1, "status": "ok", "jedi": 0, "to": "Maître des Maraudeurs", "tags": ["annuel", "tombeau", "formation", "capture", "Tatooine", "Arven"], "body": "Identité : @james1_8366\nRang : Maraudeur Sith.\nSphère : Techno-Production.\n\nDestiné à : Maître des Maraudeurs\n\n— RAPPORT —\n\n- Participation à une expédition dans un Tombeau.\n\n- Formation de certains guerriers devenus Maraudeurs.\n\n- Formation d'acolytes devenus guerriers, futurs Maraudeurs.\n\n- Capture du Capitaine républicain possédant l'arme unique, avec l'Empire Sith.\n\n- Capture de la Grande Sentinelle Arven sur Tatooine.\n\n- Entraînement avec certains Maraudeurs.\n\n— Fin du Rapport —"}
+];
 
 /* ======== MOTEUR ======== */
 const KEY="vhaelor-archives-v1";
