@@ -189,7 +189,26 @@ select option{background:#09090c}
 .autherr{color:var(--red2);font-size:12px;min-height:16px;letter-spacing:.1em}
 .shake{animation:shake .4s}
 @keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;padding:30px 16px 40px;text-transform:uppercase}
+.music{position:fixed;right:16px;bottom:16px;z-index:60;width:232px;background:rgba(14,14,19,.94);border:1px solid var(--line2);box-shadow:0 0 24px rgba(0,0,0,.6);backdrop-filter:blur(6px)}
+.music::before{content:"";position:absolute;top:-1px;left:-1px;width:10px;height:10px;border:solid var(--red);border-width:2px 0 0 2px}
+.mu-bar{display:flex;align-items:center;gap:8px;padding:8px 10px}
+.mu-title{flex:1;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--red2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mu-btn{background:none;border:1px solid var(--line2);color:var(--txt);width:26px;height:26px;cursor:pointer;font-size:11px;flex:none}
+.mu-btn:hover{border-color:var(--red);color:#fff}
+.mu-vol{display:flex;align-items:center;gap:8px;padding:0 10px 10px}
+#muVol{flex:1;padding:0;accent-color:var(--red);border:none;box-shadow:none;background:none;cursor:pointer}
+#muPct{font-size:10.5px;color:var(--dim);width:32px;text-align:right}
+.mu-player{padding:0 16px 14px}
+.mu-player iframe{display:block;width:200px;height:113px;border:1px solid var(--line2)}
+.mu-eq{display:flex;align-items:flex-end;gap:2px;height:14px;width:14px;flex:none}
+.mu-eq i{flex:1;background:var(--red2);height:20%;box-shadow:0 0 4px var(--red2)}
+.music.playing .mu-eq i{animation:eq .9s ease-in-out infinite}
+.music.playing .mu-eq i:nth-child(2){animation-delay:-.3s}.music.playing .mu-eq i:nth-child(3){animation-delay:-.6s}.music.playing .mu-eq i:nth-child(4){animation-delay:-.15s}
+@keyframes eq{0%,100%{height:20%}50%{height:100%}}
+.mu-on{position:fixed;right:16px;bottom:16px;z-index:60;background:rgba(14,14,19,.94)}
+.mu-err{font-size:11px;color:var(--dim);padding:0 0 4px}
+@media(max-width:640px){.music{right:8px;bottom:8px}}
+footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;padding:30px 16px 200px;text-transform:uppercase}
 
 /* boot */
 #boot{position:fixed;inset:0;background:#05020a;z-index:200;overflow:hidden;transition:opacity .8s,transform .8s}
@@ -208,6 +227,7 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
 .bt-title{font-family:var(--title);font-weight:900;font-size:clamp(30px,7vw,64px);letter-spacing:.35em;color:#fff;text-shadow:0 0 24px var(--glow),0 0 2px var(--red2);animation:btText 1.2s .6s both;padding-left:.35em}
 @keyframes btText{from{opacity:0;letter-spacing:1em}}
 .bt-sub{font-size:clamp(12px,1.6vw,15px);font-weight:700;color:#ff3b4d;letter-spacing:.25em;text-shadow:0 0 10px rgba(255,42,61,.9),0 2px 4px #000;animation:btText 1s .9s both}
+.bt-hint{font-size:11px;letter-spacing:.2em;color:#cfc8c4;text-transform:uppercase;opacity:.75;animation:btText 1s 1.4s both,blink 2s 2.4s infinite}
 #boot .bar{width:240px;height:2px;background:#200;animation:btText 1s .9s both}
 #boot .bar i{display:block;height:100%;width:0;background:var(--red2);box-shadow:0 0 10px var(--red2);animation:load 2s 1s forwards}
 @keyframes load{to{width:100%}}
@@ -236,6 +256,7 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
   </svg></div>
     <div class="bt-title">VHAELOR</div>
     <div class="bt-sub">CHARGEMENT DE LA BASE DE DONNÉES…</div>
+    <div class="bt-hint">♫ Clique pour entrer avec la musique</div>
     <div class="bar"><i></i></div>
   </div>
 </div>
@@ -371,6 +392,18 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
     <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-close>Annuler</button><button class="btn primary">Déverrouiller</button></div>
   </form>
 </div></div>
+
+<div class="music" id="music">
+  <div class="mu-bar">
+    <span class="mu-eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="mu-title">Thème de Vhaelor</span>
+    <button class="mu-btn" id="muPlay" title="Lecture / pause">▶</button>
+    <button class="mu-btn" id="muOff" title="Couper la musique">✕</button>
+  </div>
+  <div class="mu-vol"><button class="mu-btn" id="muMute" title="Muet">🔊</button><input type="range" id="muVol" min="0" max="100" value="35" title="Volume"><span id="muPct">35%</span></div>
+  <div class="mu-player"><div id="ytp"></div></div>
+</div>
+<button class="btn mu-on" id="muOn" hidden>♫ Musique</button>
 
 <div class="toast" id="toast"></div>
 
@@ -568,6 +601,32 @@ $("#authForm").onsubmit=e=>{e.preventDefault();
   else{$("#authErr").textContent="MOT DE PASSE INCORRECT";const b=$("#mAuth .mbox");b.classList.remove("shake");void b.offsetWidth;b.classList.add("shake");$("#authPass").select()}};
 $("#btnLock").onclick=()=>{if(unlocked){unlocked=false;try{sessionStorage.removeItem("vhaelor-unlock")}catch(e){}lockUI();toast("Base verrouillée")}else guard(()=>{})};
 lockUI();
+
+/* ======== THÈME MUSICAL (lecteur YouTube) ======== */
+const YT_ID="50SmfiH0c5Q";
+let player=null,ytReady=false,interacted=false,musicOn=true,vol=35;
+try{musicOn=localStorage.getItem("vhaelor-music")!=="off";vol=+(localStorage.getItem("vhaelor-vol")||35)}catch(e){}
+$("#muVol").value=vol;let lastVol=vol||35;
+function volUI(){$("#muPct").textContent=vol+"%";$("#muMute").textContent=vol===0?"🔇":vol<40?"🔉":"🔊"}volUI();
+function muUI(playing){$("#music").classList.toggle("playing",!!playing);$("#muPlay").textContent=playing?"❚❚":"▶";$("#music").hidden=!musicOn;$("#muOn").hidden=musicOn}
+function tryPlay(){if(musicOn&&ytReady&&interacted){try{player.playVideo()}catch(e){}}}
+window.onYouTubeIframeAPIReady=()=>{
+  player=new YT.Player("ytp",{width:200,height:113,videoId:YT_ID,
+    playerVars:{autoplay:0,loop:1,playlist:YT_ID,controls:0,rel:0,playsinline:1,modestbranding:1,disablekb:1},
+    events:{onReady:()=>{ytReady=true;player.setVolume(vol);if(vol===0)player.mute();tryPlay()},
+      onStateChange:e=>muUI(e.data===1),
+      onError:()=>{$(".mu-player").innerHTML='<div class="mu-err">Cette vidéo ne peut pas être lue ici.</div>'}}});
+};
+(()=>{const t=document.createElement("script");t.src="https://www.youtube.com/iframe_api";document.head.appendChild(t)})();
+const firstGesture=()=>{if(interacted)return;interacted=true;tryPlay()};
+["pointerdown","keydown","touchstart"].forEach(ev=>document.addEventListener(ev,firstGesture,{once:true,capture:true}));
+$("#muPlay").onclick=()=>{if(!ytReady)return;player.getPlayerState()===1?player.pauseVideo():player.playVideo()};
+function setVol(v){vol=Math.max(0,Math.min(100,v|0));if(vol>0)lastVol=vol;$("#muVol").value=vol;volUI();try{localStorage.setItem("vhaelor-vol",vol)}catch(_){}if(ytReady){player.setVolume(vol);vol===0?player.mute():player.unMute()}}
+$("#muVol").oninput=e=>setVol(+e.target.value);
+$("#muMute").onclick=()=>setVol(vol===0?lastVol:0);
+$("#muOff").onclick=()=>{musicOn=false;try{localStorage.setItem("vhaelor-music","off")}catch(e){}if(ytReady)player.stopVideo();muUI(false)};
+$("#muOn").onclick=()=>{musicOn=true;try{localStorage.removeItem("vhaelor-music")}catch(e){}muUI(false);tryPlay()};
+muUI(false);
 
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("show"),2200)}
 
