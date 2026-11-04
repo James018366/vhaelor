@@ -280,7 +280,6 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
           <option value="1">Niveau I — Restreint</option>
           <option value="2">Niveau II — Secret</option>
           <option value="3">Niveau III — Très secret</option>
-          <option value="4">Niveau IV — Noir</option>
         </select>
         <select id="fStatus">
           <option value="">Tout statut</option>
@@ -311,11 +310,11 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
   <div class="mhead"><div><div class="cid" id="fId">VR-XXXX</div><h2 id="fTitleH">Nouveau rapport</h2></div><button class="mclose" data-close>✕</button></div>
   <form class="form" id="form">
     <label class="full">Titre<input name="title" required maxlength="120" placeholder="Opération…"></label>
-    <label><select name=""></select></label>
+    <label>Type<select name="type"></select></label>
     <label>Date (après le traité de Coruscant)<input name="date" required placeholder="74 ATC · Jour 1"></label>
     <label>Lieu<input name="place" placeholder="Planète / secteur"></label>
     <label>Cible<input name="target" placeholder="Individu, faction…"></label>
-    <label>Classification<select name="level"><option value="1">I — Restreint</option><option value="2">II — Secret</option><option value="3">III — Très secret</option><option value="4">IV — Noir</option></select></label>
+    <label>Classification<select name="level"><option value="1">I — Restreint</option><option value="2">II — Secret</option><option value="3">III — Très secret</option></select></label>
     <label>Statut<select name="status"><option value="ok">Succès</option><option value="wip">En cours</option><option value="ko">Échec / Compromis</option></select></label>
     <label>Jedi abattus<input name="jedi" type="number" min="0" value="0"></label>
     <label>Destinataire<input name="to" placeholder="Darth …"></label>
@@ -333,7 +332,7 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
 
 <script>
 /* ======== DONNÉES DE BASE ======== */
-const TYPES = ["Rapport Journalier","Mission","Purge","Interrogatoire","Reconnaissance","Duel","Journal personnel"];
+const TYPES = ["Rapport journalier","Mission","Purge","Interrogatoire","Reconnaissance","Duel","Journal personnel"];
 const SEED = []; // vide : les rapports se créent directement sur le site
 
 /* ======== MOTEUR ======== */
