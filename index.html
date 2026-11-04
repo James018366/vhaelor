@@ -311,7 +311,7 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
   <div class="mhead"><div><div class="cid" id="fId">VR-XXXX</div><h2 id="fTitleH">Nouveau rapport</h2></div><button class="mclose" data-close>✕</button></div>
   <form class="form" id="form">
     <label class="full">Titre<input name="title" required maxlength="120" placeholder="Opération…"></label>
-    <label>Type<select name="type"></select></label>
+    <label><select name=""></select></label>
     <label>Date (après le traité de Coruscant)<input name="date" required placeholder="74 ATC · Jour 1"></label>
     <label>Lieu<input name="place" placeholder="Planète / secteur"></label>
     <label>Cible<input name="target" placeholder="Individu, faction…"></label>
@@ -333,7 +333,7 @@ footer{text-align:center;color:#4a4442;font-size:11px;letter-spacing:.2em;paddin
 
 <script>
 /* ======== DONNÉES DE BASE ======== */
-const TYPES = ["Mission","Purge","Interrogatoire","Reconnaissance","Duel","Journal personnel"];
+const TYPES = ["Rapport Journalier","Mission","Purge","Interrogatoire","Reconnaissance","Duel","Journal personnel"];
 const SEED = []; // vide : les rapports se créent directement sur le site
 
 /* ======== MOTEUR ======== */
